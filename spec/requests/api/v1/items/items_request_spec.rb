@@ -153,31 +153,31 @@ RSpec.describe 'Items API' do
     expect(updated_item.unit_price).to eq(original_unit_price)
     expect(updated_item.merchant_id).to eq(original_merchant_id)
 
-    # item = JSON.parse(response.body, symbolize_names: true)
-    #
-    # expect(item[:data].count).to eq(1)
-    #
-    # expect(item[:data]).to have_key(:id)
-    # expect(item[:data][:id]).to be_a(String)
-    # expect(item[:data][:id].to_i).to eq(updated_item.id)
-    #
-    # expect(item[:data][:type]).to eq("item")
-    #
-    # expect(item[:data][:attributes]).to have_key(:name)
-    # expect(item[:data][:attributes][:name]).to be_a(String)
-    # expect(item[:data][:attributes][:name]).to eq(updated_item.name)
-    #
-    # expect(item[:data][:attributes]).to have_key(:description)
-    # expect(item[:data][:attributes][:description]).to be_a(String)
-    # expect(item[:data][:attributes][:description]).to eq(updated_item.description)
-    #
-    # expect(item[:data][:attributes]).to have_key(:unit_price)
-    # expect(item[:data][:attributes][:unit_price]).to be_a(Float)
-    # expect(item[:data][:attributes][:unit_price]).to eq(updated_item.unit_price)
-    #
-    # expect(item[:data][:attributes]).to have_key(:merchant_id)
-    # expect(item[:data][:attributes][:merchant_id]).to be_a(Integer)
-    # expect(item[:data][:attributes][:merchant_id]).to eq(updated_item.merchant_id)
+    item = JSON.parse(response.body, symbolize_names: true)
+
+    expect(item[:data].count).to eq(3)
+
+    expect(item[:data]).to have_key(:id)
+    expect(item[:data][:id]).to be_a(String)
+    expect(item[:data][:id].to_i).to eq(updated_item.id)
+
+    expect(item[:data][:type]).to eq("item")
+
+    expect(item[:data][:attributes]).to have_key(:name)
+    expect(item[:data][:attributes][:name]).to be_a(String)
+    expect(item[:data][:attributes][:name]).to eq(updated_item.name)
+
+    expect(item[:data][:attributes]).to have_key(:description)
+    expect(item[:data][:attributes][:description]).to be_a(String)
+    expect(item[:data][:attributes][:description]).to eq(updated_item.description)
+
+    expect(item[:data][:attributes]).to have_key(:unit_price)
+    expect(item[:data][:attributes][:unit_price]).to be_a(Float)
+    expect(item[:data][:attributes][:unit_price]).to eq(updated_item.unit_price)
+
+    expect(item[:data][:attributes]).to have_key(:merchant_id)
+    expect(item[:data][:attributes][:merchant_id]).to be_a(Integer)
+    expect(item[:data][:attributes][:merchant_id]).to eq(updated_item.merchant_id)
   end
 
   it 'destroys an item' do
