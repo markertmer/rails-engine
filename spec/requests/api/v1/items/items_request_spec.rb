@@ -196,4 +196,30 @@ RSpec.describe 'Items API' do
     # item = JSON.parse(response.body, symbolize_names: true)
     # expect(item[:data]).to be(nil)
   end
+
+  it 'gets the merchant of an item' do
+    merchant_1 = create(:merchant)
+    item = create(:item, merchant: merchant_1)
+    merchant_2 = create(:merchant)
+
+    get "/api/v1/items/#{item.id}/merchant"
+
+    expect(response).to be_successful
+
+    merchant = JSON.parse(response.body, symbolize_names: true)
+
+    expect(merchant[:data].count).to eq(3)
+
+    expect(merchant[:data]).to have_key(:id)
+    expect(merchant[:data][:id]).to be_a(String)
+    expect(merchant[:data][:id].to_i).to eq(merchant_1.id)
+    expect(merchant[:data][:id].to_i).to_not eq(merchant_2.id)
+
+    expect(merchant[:data][:type]).to eq("merchant")
+
+    expect(merchant[:data][:attributes]).to have_key(:name)
+    expect(merchant[:data][:attributes][:name]).to be_a(String)
+    expect(merchant[:data][:attributes][:name]).to eq(merchant_1.name)
+    expect(merchant[:data][:attributes][:name]).to_not eq(merchant_2.name)
+  end
 end

@@ -13,6 +13,7 @@ Rails.application.routes.draw do
         post '', to: 'items#create'
         put ':id', to: 'items#update'
         delete ':id', to: 'items#destroy'
+        get ':id/merchant', to: 'merchants#show'
       end
     end
   end
