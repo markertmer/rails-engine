@@ -10,6 +10,9 @@ Rails.application.routes.draw do
       namespace :items do
         get '', to: 'items#index'
         get ':id', to: 'items#show'
+        post '', to: 'items#create'
+        put ':id', to: 'items#update'
+        delete ':id', to: 'items#destroy'
       end
     end
   end
