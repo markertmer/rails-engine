@@ -6,13 +6,10 @@ Rails.application.routes.draw do
         get '', to: 'merchants#index'
         get ':id', to: 'merchants#show'
         get ':merchant_id/items', to: 'items#index'
-        # resources :merchants, only: [:index, :show] do
-        #   resources :items, only: [:index]
-        # end
-        # resources :items, only: [:index]
       end
       namespace :items do
         get '', to: 'items#index'
+        get ':id', to: 'items#show'
       end
     end
   end
