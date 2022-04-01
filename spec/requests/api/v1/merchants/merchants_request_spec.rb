@@ -182,11 +182,12 @@ RSpec.describe 'Merchants API' do
     it 'sad path: no matches for find' do
       get '/api/v1/merchants/find?name=xyz'
 
-      expect(response).to be_successful
+      # expect(response).to be_successful
+      expect(response.status).to be 404
 
       merchant = JSON.parse(response.body, symbolize_names: true)
 
-      expect(merchant[:data]).to be nil
+      expect(merchant[:data].keys).to eq [:error, :message]
     end
 
     it 'sad path: no matches for find_all' do
@@ -197,6 +198,26 @@ RSpec.describe 'Merchants API' do
       merchants = JSON.parse(response.body, symbolize_names: true)
 
       expect(merchants[:data].empty?).to be true
+    end
+
+    it 'edge case: no param supplied' do
+      get '/api/v1/merchants/find'
+
+      expect(response.status).to be 400
+
+      merchant = JSON.parse(response.body, symbolize_names: true)
+
+      expect(merchant[:data].keys).to eq [:error, :message]
+    end
+
+    it 'edge case: no param value supplied' do
+      get '/api/v1/merchants/find?name='
+
+      expect(response.status).to be 400
+
+      merchant = JSON.parse(response.body, symbolize_names: true)
+
+      expect(merchant[:data].keys).to eq [:error, :message]
     end
   end
 end
