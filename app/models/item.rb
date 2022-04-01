@@ -1,5 +1,10 @@
 class Item < ApplicationRecord
   belongs_to :merchant
+  validates_associated :merchant
+  validates :name, presence: true
+  validates :description, presence: true
+  validates :unit_price, presence: true, numericality: true
+
 
   def self.find_by_name(keyword)
     where("name ILIKE ?", "%#{keyword}%").order(:name)
