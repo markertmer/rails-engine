@@ -407,20 +407,20 @@ RSpec.describe 'Items API' do
       expect(items[:data][1][:id].to_i).to_not eq(@item_1.id)
     end
 
-    xit 'finds price within a range, single result' do
+    it 'finds price within a range, single result' do
       get '/api/v1/items/find_all?min_price=5.00&max_price=50.00'
 
       expect(response).to be_successful
 
       items = JSON.parse(response.body, symbolize_names: true)
 
-      expect(items[:data].count).to eq(1) #should be 3, further problems ahead...
+      expect(items[:data].count).to eq(3)
 
-      expect(items[:data][:attributes][:type]).to eq("item")
-      expect(items[:data][:attributes]).to have_key(:id)
-      expect(items[:data][:attributes][:id].to_i).to eq(@item_2.id)
-      expect(items[:data][:attributes][:id].to_i).to_not eq(@item_3.id)
-      expect(items[:data][:attributes][:id].to_i).to_not eq(@item_1.id)
+      expect(items[:data][:type]).to eq("item")
+      expect(items[:data]).to have_key(:id)
+      expect(items[:data][:id].to_i).to eq(@item_3.id)
+      expect(items[:data][:id].to_i).to_not eq(@item_2.id)
+      expect(items[:data][:id].to_i).to_not eq(@item_1.id)
     end
 
     it 'edge case: prices equal to min and max' do

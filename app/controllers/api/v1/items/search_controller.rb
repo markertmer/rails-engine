@@ -1,14 +1,12 @@
 class Api::V1::Items::SearchController < ApplicationController
   def index
-    # items = Item.find_by_name(params[:name])
     items = item_search
+    items = item_search.first if items.count == 1
     render json: ItemSerializer.new(items)
   end
 
   def show
-    # item = Item.find_by_name(params[:name]).first
     item = item_search.first
-
     render json: ItemSerializer.new(item)
   end
 
