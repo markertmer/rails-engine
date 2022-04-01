@@ -7,9 +7,9 @@ class Item < ApplicationRecord
 
   def self.find_by_price(price_hash)
     floor = 0
-    floor = price_hash[:min] if price_hash[:min]
+    floor = price_hash[:min_price] if price_hash[:min_price]
     ceiling = Float::INFINITY
-    ceiling = price_hash[:max] if price_hash[:max]
+    ceiling = price_hash[:max_price] if price_hash[:max_price]
 
     where("unit_price >= ?", "#{floor}")
     .where("unit_price <= ?", "#{ceiling}")
