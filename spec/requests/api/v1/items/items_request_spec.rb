@@ -223,4 +223,252 @@ RSpec.describe 'Items API' do
     expect(merchant[:data][:attributes][:name]).to eq(merchant_1.name)
     expect(merchant[:data][:attributes][:name]).to_not eq(merchant_2.name)
   end
+
+  describe 'item search by name' do
+    before :each do
+      merchant = create(:merchant)
+      @item_1 = create(:item, merchant: merchant, name: "Smart Pants")
+      @item_2 = create(:item, merchant: merchant, name: "A Bunch of Ants")
+      @item_3 = create(:item, merchant: merchant, name: "Mustard")
+    end
+
+    it 'finds a single item, exact match' do
+      get '/api/v1/items/find?name=Smart%20Pants'
+
+      expect(response).to be_successful
+
+      item = JSON.parse(response.body, symbolize_names: true)
+
+      expect(item[:data].count).to eq(3)
+
+      expect(item[:data]).to have_key(:id)
+      expect(item[:data][:id]).to be_a(String)
+      expect(item[:data][:id].to_i).to eq(@item_1.id)
+      expect(item[:data][:id].to_i).to_not eq(@item_2.id)
+      expect(item[:data][:id].to_i).to_not eq(@item_3.id)
+
+      expect(item[:data][:type]).to eq("item")
+
+      expect(item[:data][:attributes]).to have_key(:name)
+      expect(item[:data][:attributes][:name]).to be_a(String)
+      expect(item[:data][:attributes][:name]).to eq(@item_1.name)
+      expect(item[:data][:attributes][:name]).to_not eq(@item_2.name)
+      expect(item[:data][:attributes][:name]).to_not eq(@item_3.name)
+
+      expect(item[:data][:attributes]).to have_key(:description)
+      expect(item[:data][:attributes][:description]).to be_a(String)
+      expect(item[:data][:attributes][:description]).to eq(@item_1.description)
+      expect(item[:data][:attributes][:description]).to_not eq(@item_2.description)
+      expect(item[:data][:attributes][:description]).to_not eq(@item_3.description)
+
+      expect(item[:data][:attributes]).to have_key(:unit_price)
+      expect(item[:data][:attributes][:unit_price]).to be_a(Float)
+      expect(item[:data][:attributes][:unit_price]).to eq(@item_1.unit_price)
+      expect(item[:data][:attributes][:unit_price]).to_not eq(@item_2.unit_price)
+      expect(item[:data][:attributes][:unit_price]).to_not eq(@item_3.unit_price)
+
+      expect(item[:data][:attributes]).to have_key(:merchant_id)
+      expect(item[:data][:attributes][:merchant_id]).to be_a(Integer)
+      expect(item[:data][:attributes][:merchant_id]).to eq(@item_1.merchant_id)
+    end
+
+    it 'finds a single item, partial match' do
+      get '/api/v1/items/find?name=Star'
+
+      expect(response).to be_successful
+
+      item = JSON.parse(response.body, symbolize_names: true)
+
+      expect(item[:data].count).to eq(3)
+
+      expect(item[:data]).to have_key(:id)
+      expect(item[:data][:id]).to be_a(String)
+      expect(item[:data][:id].to_i).to eq(@item_3.id)
+      expect(item[:data][:id].to_i).to_not eq(@item_2.id)
+      expect(item[:data][:id].to_i).to_not eq(@item_1.id)
+
+      expect(item[:data][:type]).to eq("item")
+
+      expect(item[:data][:attributes]).to have_key(:name)
+      expect(item[:data][:attributes][:name]).to be_a(String)
+      expect(item[:data][:attributes][:name]).to eq(@item_3.name)
+      expect(item[:data][:attributes][:name]).to_not eq(@item_2.name)
+      expect(item[:data][:attributes][:name]).to_not eq(@item_1.name)
+
+      expect(item[:data][:attributes]).to have_key(:description)
+      expect(item[:data][:attributes][:description]).to be_a(String)
+      expect(item[:data][:attributes][:description]).to eq(@item_3.description)
+      expect(item[:data][:attributes][:description]).to_not eq(@item_2.description)
+      expect(item[:data][:attributes][:description]).to_not eq(@item_1.description)
+
+      expect(item[:data][:attributes]).to have_key(:unit_price)
+      expect(item[:data][:attributes][:unit_price]).to be_a(Float)
+      expect(item[:data][:attributes][:unit_price]).to eq(@item_3.unit_price)
+      expect(item[:data][:attributes][:unit_price]).to_not eq(@item_2.unit_price)
+      expect(item[:data][:attributes][:unit_price]).to_not eq(@item_1.unit_price)
+
+      expect(item[:data][:attributes]).to have_key(:merchant_id)
+      expect(item[:data][:attributes][:merchant_id]).to be_a(Integer)
+      expect(item[:data][:attributes][:merchant_id]).to eq(@item_3.merchant_id)
+    end
+
+    it 'finds multiple matches, sorted alphabetically' do
+      get '/api/v1/items/find_all?name=ants'
+
+      expect(response).to be_successful
+
+      item = JSON.parse(response.body, symbolize_names: true)
+
+      expect(item[:data].count).to eq(2)
+
+      expect(item[:data][0][:type]).to eq("item")
+      expect(item[:data][0]).to have_key(:id)
+      expect(item[:data][0][:id].to_i).to eq(@item_2.id)
+      expect(item[:data][0][:id].to_i).to_not eq(@item_3.id)
+      expect(item[:data][0][:id].to_i).to_not eq(@item_1.id)
+
+      expect(item[:data][1][:type]).to eq("item")
+      expect(item[:data][1]).to have_key(:id)
+      expect(item[:data][1][:id].to_i).to eq(@item_1.id)
+      expect(item[:data][1][:id].to_i).to_not eq(@item_3.id)
+      expect(item[:data][1][:id].to_i).to_not eq(@item_2.id)
+    end
+
+    it 'sad path: no matches for find' do
+      get '/api/v1/items/find?name=xyz'
+
+      expect(response).to be_successful
+
+      item = JSON.parse(response.body, symbolize_names: true)
+
+      expect(item[:data]).to be nil
+    end
+
+    it 'sad path: no matches for find_all' do
+      get '/api/v1/items/find_all?name=xyz'
+
+      expect(response).to be_successful
+
+      items = JSON.parse(response.body, symbolize_names: true)
+
+      expect(items[:data].empty?).to be true
+    end
+  end
+
+  describe 'item search by price' do
+    before :each do
+      merchant = create(:merchant)
+      @item_1 = create(:item, merchant: merchant, unit_price: 54.99)
+      @item_2 = create(:item, merchant: merchant, unit_price: 4.20)
+      @item_3 = create(:item, merchant: merchant, unit_price: 13.50)
+    end
+
+    it 'finds prices larger than a min' do
+      get '/api/v1/items/find_all?min_price=10.00'
+
+      expect(response).to be_successful
+
+      items = JSON.parse(response.body, symbolize_names: true)
+
+      expect(items[:data].count).to eq(2)
+
+      expect(items[:data][0][:type]).to eq("item")
+      expect(items[:data][0]).to have_key(:id)
+      expect(items[:data][0][:id].to_i).to eq(@item_3.id)
+      expect(items[:data][0][:id].to_i).to_not eq(@item_2.id)
+      expect(items[:data][0][:id].to_i).to_not eq(@item_1.id)
+
+      expect(items[:data][1][:type]).to eq("item")
+      expect(items[:data][1]).to have_key(:id)
+      expect(items[:data][1][:id].to_i).to eq(@item_1.id)
+      expect(items[:data][1][:id].to_i).to_not eq(@item_2.id)
+      expect(items[:data][1][:id].to_i).to_not eq(@item_3.id)
+    end
+
+    it 'finds prices smaller than a max' do
+      get '/api/v1/items/find_all?max_price=20.00'
+
+      expect(response).to be_successful
+
+      items = JSON.parse(response.body, symbolize_names: true)
+
+      expect(items[:data].count).to eq(2)
+
+      expect(items[:data][0][:type]).to eq("item")
+      expect(items[:data][0]).to have_key(:id)
+      expect(items[:data][0][:id].to_i).to eq(@item_2.id)
+      expect(items[:data][0][:id].to_i).to_not eq(@item_3.id)
+      expect(items[:data][0][:id].to_i).to_not eq(@item_1.id)
+
+      expect(items[:data][1][:type]).to eq("item")
+      expect(items[:data][1]).to have_key(:id)
+      expect(items[:data][1][:id].to_i).to eq(@item_3.id)
+      expect(items[:data][1][:id].to_i).to_not eq(@item_2.id)
+      expect(items[:data][1][:id].to_i).to_not eq(@item_1.id)
+    end
+
+    xit 'finds price within a range, single result' do
+      get '/api/v1/items/find_all?min_price=5.00&max_price=50.00'
+
+      expect(response).to be_successful
+
+      items = JSON.parse(response.body, symbolize_names: true)
+
+      expect(items[:data].count).to eq(1) #should be 3, further problems ahead...
+
+      expect(items[:data][:attributes][:type]).to eq("item")
+      expect(items[:data][:attributes]).to have_key(:id)
+      expect(items[:data][:attributes][:id].to_i).to eq(@item_2.id)
+      expect(items[:data][:attributes][:id].to_i).to_not eq(@item_3.id)
+      expect(items[:data][:attributes][:id].to_i).to_not eq(@item_1.id)
+    end
+
+    it 'edge case: prices equal to min and max' do
+      get '/api/v1/items/find_all?max_price=54.99&min_price=4.20'
+
+      expect(response).to be_successful
+
+      items = JSON.parse(response.body, symbolize_names: true)
+
+      expect(items[:data].count).to eq(3)
+
+      expect(items[:data][0][:type]).to eq("item")
+      expect(items[:data][0]).to have_key(:id)
+      expect(items[:data][0][:id].to_i).to eq(@item_2.id)
+      expect(items[:data][0][:id].to_i).to_not eq(@item_3.id)
+      expect(items[:data][0][:id].to_i).to_not eq(@item_1.id)
+
+      expect(items[:data][1][:type]).to eq("item")
+      expect(items[:data][1]).to have_key(:id)
+      expect(items[:data][1][:id].to_i).to eq(@item_3.id)
+      expect(items[:data][1][:id].to_i).to_not eq(@item_2.id)
+      expect(items[:data][1][:id].to_i).to_not eq(@item_1.id)
+
+      expect(items[:data][2][:type]).to eq("item")
+      expect(items[:data][2]).to have_key(:id)
+      expect(items[:data][2][:id].to_i).to eq(@item_1.id)
+      expect(items[:data][2][:id].to_i).to_not eq(@item_2.id)
+      expect(items[:data][2][:id].to_i).to_not eq(@item_3.id)
+    end
+
+    it 'sad path: no price large enough' do
+      get '/api/v1/items/find_all?min_price=999.99'
+
+      expect(response).to be_successful
+
+      items = JSON.parse(response.body, symbolize_names: true)
+
+      expect(items[:data].empty?).to be true
+    end
+
+    it 'sad path: no price small enough' do
+      get '/api/v1/items/find_all?max_price=00.99'
+
+      expect(response).to be_successful
+
+      items = JSON.parse(response.body, symbolize_names: true)
+
+      expect(items[:data].empty?).to be true
+    end
+  end
 end
